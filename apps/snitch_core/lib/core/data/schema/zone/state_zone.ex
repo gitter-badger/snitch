@@ -35,7 +35,13 @@ defmodule Snitch.Data.Schema.StateZone do
     |> cast(params, @create_fields)
     |> validate_required(@create_fields)
     |> foreign_key_constraint(:zone_id)
+    |> unique_constraint(:zone_id)
     |> foreign_key_constraint(:state_id)
+    |> check_constraint(
+      :zone_id,
+      name: :state_zone_exclusivity,
+      message: "does not refer a state zone"
+    )
   end
 
   def changeset(state_zone, params, :update) do

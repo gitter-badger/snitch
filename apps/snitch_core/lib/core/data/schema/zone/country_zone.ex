@@ -35,7 +35,13 @@ defmodule Snitch.Data.Schema.CountryZone do
     |> cast(params, @create_fields)
     |> validate_required(@create_fields)
     |> foreign_key_constraint(:zone_id)
+    |> unique_constraint(:zone_id)
     |> foreign_key_constraint(:country_id)
+    |> check_constraint(
+      :zone_id,
+      name: :country_zone_exclusivity,
+      message: "does not refer a country zone"
+    )
   end
 
   def changeset(country_zone, params, :update) do

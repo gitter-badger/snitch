@@ -9,13 +9,18 @@ defmodule Snitch.Data.Schema.Zone do
 
   use Snitch.Data.Schema
 
+  @valid_zone_types ["S", "C"]
+  @readable_valid_zone_types @valid_zone_types
+                             |> Enum.map(fn x -> "`#{x}`" end)
+                             |> Enum.intersperse(", ")
+
   @typedoc """
   Zone struct.
 
   ## Fields
 
-  * `zone_type` is a discriminator, the only valid values are the characters `S`
-    and `C`.
+  * `zone_type` is a discriminator, the only valid values are the
+    characters [#{@readable_valid_zone_types}].
   """
   @type t :: %__MODULE__{}
 
@@ -27,7 +32,7 @@ defmodule Snitch.Data.Schema.Zone do
   end
 
   @update_fields ~w(name description)a
-  @create_fields [:type | @update_fields]
+  @create_fields [:zone_type | @update_fields]
 
   @doc """
   Returns a `Zone` changeset.
@@ -37,13 +42,14 @@ defmodule Snitch.Data.Schema.Zone do
     zone
     |> cast(params, @create_fields)
     |> validate_required(@create_fields)
-    |> validate_discriminator(:type, ["S", "C"])
+    |> validate_discriminator(:zone_type, @valid_zone_types)
   end
 
   def changeset(zone, params, :update) do
-    zone
-    |> cast(params, @update_fields)
+    cast(zone, params, @update_fields)
   end
+
+  defp validate_discriminator(%{valid?: false} = changeset, _, _), do: changeset
 
   defp validate_discriminator(%{valid?: true} = changeset, key, permitted) do
     {_, discriminator} = fetch_field(changeset, key)
@@ -51,8 +57,7 @@ defmodule Snitch.Data.Schema.Zone do
     if discriminator in permitted do
       changeset
     else
-      changeset
-      |> add_error(:payment_type, "'#{discriminator}' is invalid", validation: :inclusion)
+      add_error(changeset, :zone_type, "'#{discriminator}' is invalid", validation: :inclusion)
     end
   end
 end
