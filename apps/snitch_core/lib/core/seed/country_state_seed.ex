@@ -14,22 +14,28 @@ defmodule Snitch.Seed.CountryState do
 
   def insert_countries do
     wc = WorldCountry.all()
-    all_countries = Enum.map(wc, fn country -> to_param(country) end)
-    {_ ,countries_ids} = Repo.insert_all("snitch_countries", 
-                                        all_countries, 
-                                        on_conflict: :nothing, 
-                                        returning: [:id])    
-    country_id = Enum.map(countries_ids, fn (x) -> x.id end)
-    
-    wc 
-    |> Enum.map(&WorldRegion.regions_for/1)
-    |> Enum.zip(country_id)
-    |> Enum.map(fn {statelist, id} -> 
-                    Enum.map(statelist, fn state -> 
-                          to_param(state, id) end) end)
-    |> List.flatten
-    |> insert_and_map_states  
-
+    seed_count = Repo.aggregate("snitch_countries", :count, :id)
+     require IEx
+     IEx.pry 
+    if length(wc) == seed_count do 
+      IO.puts("We have already seeded! No need to seed agin");
+    else
+      all_countries = Enum.map(wc, fn country -> to_param(country) end)
+      {_ ,countries_ids} = Repo.insert_all("snitch_countries", 
+                                          all_countries, 
+                                          on_conflict: :nothing, 
+                                          returning: [:id])    
+      country_ids = Stream.map(countries_ids, fn (x) -> x.id end)
+      
+      wc 
+      |> Stream.map(&WorldRegion.regions_for/1)
+      |> Stream.zip(country_ids)
+      |> Enum.map(fn {statelist, id} -> 
+                      Enum.map(statelist, fn state -> 
+                            to_param(state, id) end) end)
+      |> List.flatten
+      |> insert_and_map_states 
+    end                    
   end
 
   def insert_and_map_states(states) do
