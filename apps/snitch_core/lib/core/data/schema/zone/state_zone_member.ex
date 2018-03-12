@@ -1,15 +1,12 @@
-defmodule Snitch.Data.Schema.StateZone do
+defmodule Snitch.Data.Schema.StateZoneMember do
   @moduledoc """
-  Models a Zone of States.
-
-  `StateZone` is a "subtype" ie, it is a "concrete" `Zone` comprised of _only_
-  `State`s.
+  Models a StateZone member.
   """
   use Snitch.Data.Schema
   alias Snitch.Data.Schema.{Zone, State}
 
   @typedoc """
-  StateZone struct.
+  StateZoneMember struct.
 
   ## Fields
 
@@ -17,7 +14,7 @@ defmodule Snitch.Data.Schema.StateZone do
   """
   @type t :: %__MODULE__{}
 
-  schema "snitch_state_zones" do
+  schema "snitch_state_zone_members" do
     belongs_to(:zone, Zone)
     belongs_to(:state, State)
     timestamps()
@@ -35,7 +32,7 @@ defmodule Snitch.Data.Schema.StateZone do
     |> cast(params, @create_fields)
     |> validate_required(@create_fields)
     |> foreign_key_constraint(:zone_id)
-    |> unique_constraint(:zone_id)
+    |> unique_constraint(:state_id, name: :snitch_state_zone_members_zone_id_state_id_index)
     |> foreign_key_constraint(:state_id)
     |> check_constraint(
       :zone_id,
@@ -48,5 +45,6 @@ defmodule Snitch.Data.Schema.StateZone do
     state_zone
     |> cast(params, @update_fields)
     |> foreign_key_constraint(:state_id)
+    |> unique_constraint(:state_id, name: :snitch_state_zone_members_zone_id_state_id_index)
   end
 end

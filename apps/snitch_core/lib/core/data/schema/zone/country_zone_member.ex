@@ -1,15 +1,12 @@
-defmodule Snitch.Data.Schema.CountryZone do
+defmodule Snitch.Data.Schema.CountryZoneMember do
   @moduledoc """
-  Models a Zone of Countrys.
-
-  `CountryZone` is a "subtype" ie, it is a "concrete" `Zone` comprised of _only_
-  `Country`s.
+  Models a CountryZone member.
   """
   use Snitch.Data.Schema
   alias Snitch.Data.Schema.{Zone, Country}
 
   @typedoc """
-  CountryZone struct.
+  CountryZoneMember struct.
 
   ## Fields
 
@@ -17,7 +14,7 @@ defmodule Snitch.Data.Schema.CountryZone do
   """
   @type t :: %__MODULE__{}
 
-  schema "snitch_country_zones" do
+  schema "snitch_country_zone_members" do
     belongs_to(:zone, Zone)
     belongs_to(:country, Country)
     timestamps()
@@ -35,7 +32,7 @@ defmodule Snitch.Data.Schema.CountryZone do
     |> cast(params, @create_fields)
     |> validate_required(@create_fields)
     |> foreign_key_constraint(:zone_id)
-    |> unique_constraint(:zone_id)
+    |> unique_constraint(:country_id, name: :snitch_country_zone_members_zone_id_country_id_index)
     |> foreign_key_constraint(:country_id)
     |> check_constraint(
       :zone_id,
@@ -48,5 +45,6 @@ defmodule Snitch.Data.Schema.CountryZone do
     country_zone
     |> cast(params, @update_fields)
     |> foreign_key_constraint(:country_id)
+    |> unique_constraint(:country_id, name: :snitch_country_zone_members_zone_id_country_id_index)
   end
 end

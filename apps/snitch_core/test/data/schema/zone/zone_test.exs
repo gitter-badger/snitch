@@ -2,8 +2,6 @@ defmodule Snitch.Data.Schema.ZoneTest do
   use ExUnit.Case, async: true
   use Snitch.DataCase
 
-  import Snitch.Factory
-
   alias Snitch.Data.Schema.Zone
 
   test "Zone invalidates bad type" do
